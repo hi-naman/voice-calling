@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple VoIP Calling App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>VoIP WebRTC App</h1>
+        
+        <p id="status-text">Status: Not Connected</p>
+
+        <div id="room-controls">
+            <input type="text" id="room-input" placeholder="Enter Room Code (e.g., apple123)">
+            <button id="join-btn">Join Room</button>
+        </div>
+
+        <div id="call-controls" style="display: none;">
+            <p>In Room: <span id="current-room"></span></p>
+            
+            <label for="mic-select">Choose Microphone:</label>
+            <select id="mic-select"></select>
+            <br><br>
+
+            <button id="call-btn">Call</button>
+            <button id="mute-btn">Mute</button>
+            <button id="hangup-btn">Hang Up</button>
+        </div>
+
+        <audio id="remote-audio" autoplay></audio>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
