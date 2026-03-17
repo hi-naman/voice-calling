@@ -20,6 +20,12 @@
         <div id="call-controls" style="display: none;">
             <p>In Room: <span id="current-room"></span></p>
             
+            <div class="user-list-container">
+                <p class="list-title">Users in this room:</p>
+                <ul id="users-list">
+                    </ul>
+            </div>
+
             <label for="mic-select">Choose Microphone:</label>
             <select id="mic-select"></select>
             <br><br>
@@ -27,6 +33,8 @@
             <button id="call-btn">Call</button>
             <button id="mute-btn">Mute</button>
             <button id="hangup-btn">Hang Up</button>
+            
+            <button id="leave-btn">Leave Room</button>
         </div>
 
         <audio id="remote-audio" autoplay></audio>

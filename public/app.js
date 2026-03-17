@@ -67,6 +67,8 @@ const roomControls = document.getElementById('room-controls');
 const callControls = document.getElementById('call-controls');
 const currentRoomText = document.getElementById('current-room');
 const statusText = document.getElementById('status-text');
+const usersList = document.getElementById('users-list');
+const leaveBtn = document.getElementById('leave-btn');
 
 // Variable to keep track of what room we are in
 let currentRoom = '';
@@ -91,10 +93,26 @@ joinBtn.addEventListener('click', () => {
     }
 });
 
-// Listen for the server telling us someone else joined our room
-socket.on('user-joined', (userId) => {
-    console.log("Another user joined the room!");
-    statusText.innerText = "Status: Another user is here! Ready to call.";
+// --- NEW: Dynamic User List Rendering ---
+// Listen for the server sending the updated array of users
+socket.on('room-users-update', (users) => {
+    // 1. Clear out the old list
+    usersList.innerHTML = '';
+    
+    // 2. Loop through the array and create an HTML list item for each person
+    users.forEach(user => {
+        const li = document.createElement('li');
+        // Add " (You)" next to your own name so you know which one you are!
+        li.textContent = user.name + (user.id === socket.id ? ' (You)' : '');
+        usersList.appendChild(li);
+    });
+
+    // 3. Update the status text based on how many people are in the room
+    if (users.length === 1) {
+        statusText.innerText = `Status: In Room "${currentRoom}". Waiting for someone else...`;
+    } else {
+        statusText.innerText = "Status: Users are in the room. Ready to call.";
+    }
 });
 
 // --- NEW CODE: WebRTC Peer Connection ---
@@ -230,4 +248,25 @@ socket.on('hangup', () => {
         peerConnection = null;
     }
     statusText.innerText = "Status: The other user ended the call.";
+});
+
+// --- NEW: Leave Room Logic ---
+leaveBtn.addEventListener('click', () => {
+    // 1. Tell the Node.js server to remove us from this room
+    socket.emit('leave-room');
+    
+    // 2. Hang up the WebRTC connection if a call is currently active
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+    
+    // 3. Reset the User Interface completely
+    callControls.style.display = 'none';      // Hide the call buttons
+    roomControls.style.display = 'block';     // Show the join input again
+    roomInput.value = '';                     // Clear the input field
+    currentRoom = '';
+    
+    // 4. Update the status text
+    statusText.innerText = "Status: Left the room. Enter a new code to join.";
 });

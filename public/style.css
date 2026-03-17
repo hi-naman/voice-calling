@@ -147,3 +147,62 @@ button:active {
     margin-bottom: 1.5rem;
     color: var(--text-muted);
 }
+
+/* --- NEW: User List Styling --- */
+.user-list-container {
+    background-color: var(--bg-color);
+    border: 1px solid #334155;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.list-title {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#users-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#users-list li {
+    background-color: #1e293b;
+    padding: 0.5rem 0.8rem;
+    margin-bottom: 0.3rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Add a little green dot next to the names to show they are "online" */
+#users-list li::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--success);
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+/* --- NEW: Leave Button Styling --- */
+#leave-btn {
+    background-color: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+    margin-top: 1rem;
+}
+
+#leave-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    border-color: white;
+}

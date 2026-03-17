@@ -9,21 +9,59 @@ const io = new Server(server);
 // Tell Express to serve the static files in our 'public' folder
 app.use(express.static('public'));
 
-// Replace the old io.on block with this:
+// Add this right before io.on('connection', ...)
+// This object will act as our server's memory to track rooms and users
+const rooms = {}; 
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    // 1. Handle joining a room
+    // --- NEW: Enhanced Join Room Logic ---
     socket.on('join-room', (roomCode) => {
         socket.join(roomCode);
-        console.log(`User ${socket.id} joined room: ${roomCode}`);
         
-        // Let anyone else already in the room know that a new person arrived
-        socket.to(roomCode).emit('user-joined', socket.id);
+        // If this room doesn't exist in our memory yet, create it
+        if (!rooms[roomCode]) {
+            rooms[roomCode] = [];
+        }
+
+        // Figure out the user's name based on how many people are already there
+        const userNumber = rooms[roomCode].length + 1;
+        const userName = `User ${userNumber}`;
+
+        // Add this user to our server's memory for this room
+        const newUser = { id: socket.id, name: userName };
+        rooms[roomCode].push(newUser);
+
+        console.log(`${userName} (${socket.id}) joined room: ${roomCode}`);
+
+        // Broadcast the completely updated list of users to EVERYONE in the room
+        io.to(roomCode).emit('room-users-update', rooms[roomCode]);
+        
+        // Keep track of which room this socket is in for when they disconnect
+        socket.roomCode = roomCode; 
     });
 
-    // 2. Relay WebRTC Signaling Data ONLY to the specific room
-    // We will use these in the next step to connect the audio!
+    // --- NEW: Leave Room Logic ---
+    socket.on('leave-room', () => {
+        const roomCode = socket.roomCode;
+        if (roomCode && rooms[roomCode]) {
+            // Remove the user from our memory array
+            rooms[roomCode] = rooms[roomCode].filter(user => user.id !== socket.id);
+            
+            // Tell everyone else in the room the new updated list
+            io.to(roomCode).emit('room-users-update', rooms[roomCode]);
+            
+            // Tell the other person to hang up if a call was active
+            socket.to(roomCode).emit('hangup');
+            
+            // Actually pull the socket out of the virtual room
+            socket.leave(roomCode);
+            socket.roomCode = null;
+        }
+    });
+
+    // --- EXISTING: Relay WebRTC Signaling Data ---
     socket.on('offer', (roomCode, offer) => {
         socket.to(roomCode).emit('offer', offer);
     });
@@ -36,13 +74,20 @@ io.on('connection', (socket) => {
         socket.to(roomCode).emit('ice-candidate', candidate);
     });
 
-    // Relay the hangup signal to the other user in the room
     socket.on('hangup', (roomCode) => {
         socket.to(roomCode).emit('hangup');
     });
 
+    // --- UPDATED: Disconnect Logic ---
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
+        // If they close the browser tab, treat it exactly like leaving the room
+        if (socket.roomCode) {
+            const roomCode = socket.roomCode;
+            rooms[roomCode] = rooms[roomCode].filter(user => user.id !== socket.id);
+            io.to(roomCode).emit('room-users-update', rooms[roomCode]);
+            socket.to(roomCode).emit('hangup');
+        }
     });
 });
 
