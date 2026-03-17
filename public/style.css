@@ -1,0 +1,149 @@
+/* --- Modern Dark Theme Variables --- */
+:root {
+    --bg-color: #0f172a;        /* Deep modern blue-black */
+    --card-bg: #1e293b;         /* Slightly lighter card background */
+    --text-main: #f8fafc;       /* Crisp white text */
+    --text-muted: #94a3b8;      /* Soft gray for secondary text */
+    --primary: #3b82f6;         /* Vibrant blue for primary actions */
+    --primary-hover: #2563eb;
+    --success: #22c55e;         /* Green for Call */
+    --success-hover: #16a34a;
+    --danger: #ef4444;          /* Red for Hang Up */
+    --danger-hover: #dc2626;
+    --warning: #f59e0b;         /* Orange for Mute */
+    --warning-hover: #d97706;
+}
+
+/* --- Global Reset --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Body & Layout --- */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* --- Main App Card --- */
+.container {
+    background-color: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 1.2rem;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* --- Status Bar --- */
+#status-text {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--bg-color);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+}
+
+/* --- Inputs & Dropdowns --- */
+input[type="text"], select {
+    width: 100%;
+    padding: 0.9rem;
+    margin-bottom: 1.2rem;
+    border: 1.5px solid #334155;
+    border-radius: 0.5rem;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: var(--primary);
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* --- Buttons --- */
+button {
+    width: 100%;
+    padding: 0.9rem;
+    margin-bottom: 0.8rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:active {
+    transform: scale(0.98); /* Satisfying click effect */
+}
+
+/* Semantic Button Colors */
+#join-btn {
+    background-color: var(--primary);
+}
+#join-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+#call-btn {
+    background-color: var(--success);
+    margin-top: 1rem;
+}
+#call-btn:hover {
+    background-color: var(--success-hover);
+}
+
+#hangup-btn {
+    background-color: var(--danger);
+}
+#hangup-btn:hover {
+    background-color: var(--danger-hover);
+}
+
+#mute-btn {
+    background-color: var(--warning);
+}
+#mute-btn:hover {
+    background-color: var(--warning-hover);
+}
+
+/* --- Helpers --- */
+#current-room {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+#call-controls p {
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+}
