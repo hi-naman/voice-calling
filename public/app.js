@@ -73,6 +73,56 @@ const leaveBtn = document.getElementById('leave-btn');
 // Variable to keep track of what room we are in
 let currentRoom = '';
 
+// --- NEW: Two-Step Lobby & LocalStorage Logic ---
+
+// Get the new DOM elements
+const nameSetup = document.getElementById('name-setup');
+const usernameInput = document.getElementById('username-input');
+const saveNameBtn = document.getElementById('save-name-btn');
+const displayNameSpan = document.getElementById('display-name');
+const editNameLink = document.getElementById('edit-name-link');
+
+let userName = '';
+
+// Function to check memory and set the correct screen
+function checkSavedName() {
+    const savedName = localStorage.getItem('voipUserName');
+    
+    if (savedName) {
+        // Memory exists! Skip to Screen 2
+        userName = savedName;
+        displayNameSpan.innerText = userName;
+        nameSetup.style.display = 'none';
+        roomControls.style.display = 'block';
+    } else {
+        // No memory. Show Screen 1
+        nameSetup.style.display = 'block';
+        roomControls.style.display = 'none';
+    }
+}
+
+// When the user clicks "Continue" on Screen 1
+saveNameBtn.addEventListener('click', () => {
+    const enteredName = usernameInput.value.trim();
+    if (enteredName !== '') {
+        // Save to memory and proceed
+        localStorage.setItem('voipUserName', enteredName);
+        checkSavedName(); 
+    } else {
+        alert("Please enter a display name to continue.");
+    }
+});
+
+// If the user wants to change their name
+editNameLink.addEventListener('click', (e) => {
+    e.preventDefault(); // Stop the link from jumping the page
+    localStorage.removeItem('voipUserName'); // Clear memory
+    checkSavedName(); // Send them back to Screen 1
+});
+
+// Run this check the moment the page loads
+checkSavedName();
+
 // When the user clicks "Join Room"
 joinBtn.addEventListener('click', () => {
     const roomCode = roomInput.value.trim();
@@ -81,7 +131,7 @@ joinBtn.addEventListener('click', () => {
         currentRoom = roomCode;
         
         // Tell our Node.js server to put us in this room
-        socket.emit('join-room', currentRoom);
+        socket.emit('join-room', currentRoom, userName);
 
         // Update the User Interface
         roomControls.style.display = 'none';      // Hide the input
@@ -150,6 +200,28 @@ function createPeerConnection() {
     };
 }
 
+// --- NEW: Helper function to toggle call buttons ---
+function toggleCallUI(isCallActive) {
+    if (isCallActive) {
+        // Call is connected: Hide Call, Show Mute & Hang Up
+        callBtn.style.display = 'none';
+        muteBtn.style.display = 'block';
+        hangupBtn.style.display = 'block';
+    } else {
+        // Call ended: Show Call, Hide Mute & Hang Up
+        callBtn.style.display = 'block';
+        muteBtn.style.display = 'none';
+        hangupBtn.style.display = 'none';
+        
+        // Reset mute state for the next call
+        isMuted = false;
+        muteBtn.innerText = "Mute";
+        if (localStream && localStream.getAudioTracks().length > 0) {
+            localStream.getAudioTracks()[0].enabled = true; 
+        }
+    }
+}
+
 // --- The Call Handshake Logic ---
 
 // When User A clicks the "Call" button
@@ -180,6 +252,8 @@ socket.on('offer', async (offer) => {
     // Send the Answer back to User A
     socket.emit('answer', currentRoom, answer);
     statusText.innerText = "Status: Call Connected!";
+
+    toggleCallUI(true);
 });
 
 // When User A receives the "Answer" from User B
@@ -187,6 +261,8 @@ socket.on('answer', async (answer) => {
     // User A accepts the Answer, completing the handshake
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
     statusText.innerText = "Status: Call Connected!";
+
+    toggleCallUI(true);
 });
 
 // When either user receives a network path (ICE Candidate) from the other
@@ -237,6 +313,8 @@ function endCall() {
     
     // Tell the signaling server we hung up so it can notify the other person
     socket.emit('hangup', currentRoom);
+
+    toggleCallUI(false);
 }
 
 hangupBtn.addEventListener('click', endCall);
@@ -248,6 +326,8 @@ socket.on('hangup', () => {
         peerConnection = null;
     }
     statusText.innerText = "Status: The other user ended the call.";
+
+    toggleCallUI(false);
 });
 
 // --- NEW: Leave Room Logic ---
@@ -260,6 +340,8 @@ leaveBtn.addEventListener('click', () => {
         peerConnection.close();
         peerConnection = null;
     }
+
+    toggleCallUI(false);
     
     // 3. Reset the User Interface completely
     callControls.style.display = 'none';      // Hide the call buttons

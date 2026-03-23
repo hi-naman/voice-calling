@@ -12,7 +12,17 @@
         
         <p id="status-text">Status: Not Connected</p>
 
-        <div id="room-controls">
+        <div id="name-setup">
+            <p>Welcome! What should we call you?</p>
+            <input type="text" id="username-input" placeholder="e.g., Naman">
+            <button id="save-name-btn">Continue</button>
+        </div>
+
+        <div id="room-controls" style="display: none;">
+            <p style="margin-bottom: 1rem; color: var(--primary); font-weight: bold;">
+                Hello, <span id="display-name"></span>! 
+                <a href="#" id="edit-name-link" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 10px;">Edit</a>
+            </p>
             <input type="text" id="room-input" placeholder="Enter Room Code (e.g., apple123)">
             <button id="join-btn">Join Room</button>
         </div>

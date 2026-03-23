@@ -16,29 +16,24 @@ const rooms = {};
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    // --- NEW: Enhanced Join Room Logic ---
-    socket.on('join-room', (roomCode) => {
+// Update the listener to accept 'userName'
+    socket.on('join-room', (roomCode, userName) => {
         socket.join(roomCode);
         
-        // If this room doesn't exist in our memory yet, create it
         if (!rooms[roomCode]) {
             rooms[roomCode] = [];
         }
 
-        // Figure out the user's name based on how many people are already there
-        const userNumber = rooms[roomCode].length + 1;
-        const userName = `User ${userNumber}`;
+        // --- NEW: Use the provided name, fallback to "Guest" just in case ---
+        const finalName = userName || `Guest ${Math.floor(Math.random() * 1000)}`;
 
-        // Add this user to our server's memory for this room
-        const newUser = { id: socket.id, name: userName };
+        // Add this user to our server's memory
+        const newUser = { id: socket.id, name: finalName };
         rooms[roomCode].push(newUser);
 
-        console.log(`${userName} (${socket.id}) joined room: ${roomCode}`);
+        console.log(`${finalName} (${socket.id}) joined room: ${roomCode}`);
 
-        // Broadcast the completely updated list of users to EVERYONE in the room
         io.to(roomCode).emit('room-users-update', rooms[roomCode]);
-        
-        // Keep track of which room this socket is in for when they disconnect
         socket.roomCode = roomCode; 
     });
 

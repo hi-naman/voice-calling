@@ -108,6 +108,9 @@ button:active {
 }
 
 /* Semantic Button Colors */
+#save-name-btn {
+    background-color: var(--primary);
+}
 #join-btn {
     background-color: var(--primary);
 }
@@ -146,6 +149,10 @@ button:active {
 #call-controls p {
     margin-bottom: 1.5rem;
     color: var(--text-muted);
+}
+
+#name-setup p{
+    margin-bottom: 0.7rem;
 }
 
 /* --- NEW: User List Styling --- */
@@ -205,4 +212,9 @@ button:active {
     background-color: rgba(255, 255, 255, 0.05);
     color: white;
     border-color: white;
+}
+
+/* --- NEW: Initial Button States --- */
+#mute-btn, #hangup-btn {
+    display: none;
 }
